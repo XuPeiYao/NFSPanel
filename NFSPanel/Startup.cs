@@ -17,7 +17,7 @@ namespace NFSPanel {
         public void ConfigureServices(IServiceCollection services) {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddScoped<NFSExportsService>();
+            services.AddTransient<NFSExportsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,5 +1,12 @@
-﻿@page "/"
+@page "/"
+@using NFSPanel.Data
+@inject NFSExportsService nfsServices
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+@functions {
+    List<NFSMount> mounts;
+
+    protected override async Task OnInitAsync() {
+        mounts = nfsServices.Mounts;
+    }
+}
