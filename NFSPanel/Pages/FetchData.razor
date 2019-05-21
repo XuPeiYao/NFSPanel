@@ -1,17 +1,14 @@
 @page "/fetchdata"
 @using NFSPanel.Data
-@inject WeatherForecastService ForecastService
+@inject NFSExportsService nfsServices
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
 
-@if (forecasts == null)
-{
+@if (mounts == null) {
     <p><em>Loading...</em></p>
-}
-else
-{
+} else {
     <table class="table">
         <thead>
             <tr>
@@ -22,13 +19,9 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
-            {
+            @foreach (var mount in mounts) {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@mount.Path</td>
                 </tr>
             }
         </tbody>
@@ -36,10 +29,9 @@ else
 }
 
 @functions {
-    WeatherForecast[] forecasts;
+    List<NFSMount> mounts;
 
-    protected override async Task OnInitAsync()
-    {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+    protected override async Task OnInitAsync() {
+        mounts = nfsServices.Mounts;
     }
 }
