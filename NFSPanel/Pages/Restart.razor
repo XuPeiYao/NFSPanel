@@ -1,0 +1,48 @@
+@page "/restart"
+@using NFSPanel.Data
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop;
+@using System.IO;
+@using System.Threading;
+@using System.Text;
+@inject NFSExportsService nfsServices
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm" style="text-align: left">
+            <h1>重啟NFS服務</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-danger" role="alert">
+                這個動作將暫時中斷現有NFS服務!
+            </div>
+            <button type="button" class="btn btn-warning" onclick="@(async(e)=> await RestartNFS(e))">
+                @if (restart) {
+                    <div class="spinner-border text-primary" role="status" style="        width: 20px;
+        height: 20px;">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                } else {
+                    <i class="fas fa-radiation"></i>
+                } 重啟NFS服務
+            </button>
+        </div>
+    </div>
+</div>
+
+@functions {
+    bool restart = false;
+    public async Task RestartNFS(UIMouseEventArgs e) {
+        if (restart == true) {
+            return;
+        }
+        restart = true;
+        StateHasChanged();
+        await Task.Run(nfsServices.RestartService);
+        restart = false;
+        StateHasChanged();
+    }
+}
+

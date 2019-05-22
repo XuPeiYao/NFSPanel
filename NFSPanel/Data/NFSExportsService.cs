@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NFSPanel.Data {
@@ -66,7 +67,8 @@ namespace NFSPanel.Data {
 
 
         public void RestartService() {
-            Exec(Environment.GetEnvironmentVariable("NFS") + " restart");
+            Thread.Sleep(10000);
+            //Exec(Environment.GetEnvironmentVariable("NFS") + " restart");
         }
     }
 }
