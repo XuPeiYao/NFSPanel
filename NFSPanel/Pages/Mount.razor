@@ -1,0 +1,117 @@
+@page "/mount"
+@page "/mount/{mountId}"
+@using NFSPanel.Data
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop;
+@using System.IO;
+@using System.Threading;
+@using System.Text;
+@inject IJSRuntime jsRuntime
+@inject NFSExportsService nfsServices
+@inject IUriHelper uriHelper
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm" style="        text-align: left">
+            <h1>@(IsEdit ? "編輯" : "新增")掛載目錄</h1>
+        </div>
+        <div class="col-sm" style="        text-align: right">
+            <button type="button" class="btn btn-warning" onclick="@Save">
+                @if (saveing) {
+                    <div class="spinner-border text-primary" role="status" style="        width: 20px;
+        height: 20px;">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                } else {
+                    <i class="fas fa-save"></i>
+                } 儲存掛載
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="mountPath">掛載目錄路徑</span>
+                </div>
+                <input type="text" class="form-control" aria-describedby="mountPath" bind="@MountInstance.Path" />
+            </div>
+
+        </div>
+        <div class="col-12">
+            <div>
+                <h3>
+                    客戶端列表
+                    <span style="        float: right;">
+                        <button type="button" class="btn btn-primary" onclick="@AddClient"><i class="fas fa-plus-circle"></i> 新增</button>
+                    </span>
+                </h3>
+            </div>
+            @foreach (var client in MountInstance.Clients) {
+                <div class="input-group" style="        margin-top: 5px">
+                    <input type="text" class="form-control" placeholder="客戶端位址" bind="@client.Client" />
+                    <select class="custom-select" aria-label="讀寫權限"
+                            onchange="@((UIChangeEventArgs e)=> { client.Permission = Enum.Parse<NFSPermission>(e.Value.ToString()); })">
+                        <option value="value=" Async" ReadOnly.ToString()" selected>唯讀</option>
+                        <option value="@NFSPermission.ReadAndWrite.ToString()">可讀寫</option>
+                    </select>
+                    <select class="custom-select" aria-label="同步類型"
+                            onchange="@((UIChangeEventArgs e)=> { client.Async = e.Value.ToString() == "Async"; })">
+                        <option value="Async" selected>異步</option>
+                        <option value="Sync">同步</option>
+                    </select>
+                    <select class="custom-select" aria-label="Squash"
+                            onchange="@((UIChangeEventArgs e)=> { client.Squash = Enum.Parse<NFSSquash>(e.Value.ToString().Split('-')[0]); })">
+                        <option value="@NFSSquash.Root.ToString()" selected>Root-Squash</option>
+                        <option value="@NFSSquash.All.ToString()">All-Squash</option>
+                        <option value="@NFSSquash.No.ToString()">No-Squash</option>
+                    </select>
+                    <button type="button" class="btn btn-danger" onclick="@(async(e)=> {await DeleteClient(e,client); })"><i class="fas fa-trash-alt"></i> 刪除</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    bool IsEdit = false;
+
+    [Parameter]
+    string MountId { get; set; }
+
+    NFSMount MountInstance { get; set; } = new NFSMount() {
+        Path = "/tmp"
+    };
+
+    bool saveing = false;
+
+    protected override async Task OnInitAsync() {
+        IsEdit = MountId != null;
+
+        if (IsEdit) {
+            MountInstance = nfsServices.Mounts.Single(x => x.Path == Encoding.UTF8.GetString(Convert.FromBase64String(MountId)));
+        } else {
+            nfsServices.Mounts.Add(MountInstance);
+        }
+    }
+
+    public async Task Save(UIMouseEventArgs e) {
+        if (saveing) {
+            return;
+        }
+        saveing = true;
+        StateHasChanged();
+        await Task.Run(nfsServices.SaveChanges);
+        saveing = false;
+        StateHasChanged();
+    }
+
+    public async Task AddClient(UIMouseEventArgs e) {
+        MountInstance.Clients.Add(new NFSClient());
+    }
+
+    public async Task DeleteClient(UIMouseEventArgs e, NFSClient client) {
+        MountInstance.Clients.Remove(client);
+    }
+
+}

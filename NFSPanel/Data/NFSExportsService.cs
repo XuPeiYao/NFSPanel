@@ -58,17 +58,33 @@ namespace NFSPanel.Data {
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(x => NFSMount.Parse(x))
                 .ToList();
+
+#if DEBUG
+            if (Mounts.Count == 0) {
+                Mounts.Add(new NFSMount() {
+                    Path = "/app",
+                    Clients = new List<NFSClient>
+                    ()
+                });
+                Mounts.Add(new NFSMount() {
+                    Path = "/app2",
+                    Clients = new List<NFSClient>
+                    ()
+                });
+            }
+#endif            
         }
 
         public void SaveChanges() {
             var output = string.Join("\n", Mounts.Select(x => x.ToString()));
             File.WriteAllText(Environment.GetEnvironmentVariable("Exports"), output);
+            Thread.Sleep(1000);
         }
 
 
         public void RestartService() {
-            Thread.Sleep(10000);
-            //Exec(Environment.GetEnvironmentVariable("NFS") + " restart");
+            Exec(Environment.GetEnvironmentVariable("NFS") + " restart");
+            Thread.Sleep(1000);
         }
     }
 }

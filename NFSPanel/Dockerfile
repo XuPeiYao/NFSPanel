@@ -1,5 +1,8 @@
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS base
 
+RUN apt-get update
+RUN apt-get install -y nfs-kernel-server nfs-common
+
 ENV ACCOUNT=admin
 ENV PASSWORD=admin
 

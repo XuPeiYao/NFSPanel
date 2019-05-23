@@ -101,21 +101,12 @@
 
     protected override async Task OnInitAsync() {
         mounts = nfsServices.Mounts;
-#if DEBUG
-        mounts = new List<NFSMount>
-            ();
-        mounts.Add(new NFSMount() {
-            Path = "/app",
-            Clients = new List<NFSClient>
-            ()
-        });
-#endif
     }
 
     public async Task OpenDeleteMountModal(UIMouseEventArgs e, NFSMount mount) {
+        selectedMount = mount;
         await jsRuntime.InvokeAsync<object>
             ("eval", "$('#deleteMountModal').modal('show');0;");
-        selectedMount = mount;
     }
 
     public async Task DeleteMount() {
@@ -151,6 +142,7 @@
         reloading = true;
         StateHasChanged();
         await Task.Run(nfsServices.Reload);
+        mounts = nfsServices.Mounts;
         reloading = false;
         StateHasChanged();
     }

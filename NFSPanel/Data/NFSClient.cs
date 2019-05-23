@@ -6,7 +6,7 @@ namespace NFSPanel.Data {
         public string Client { get; set; }
         public NFSPermission Permission { get; set; } = NFSPermission.ReadOnly;
         public bool Async { get; set; } = true;
-        public NFSSquash Squash { get; set; }
+        public NFSSquash Squash { get; set; } = NFSSquash.Root;
 
         public override string ToString() {
             List<string> options = new List<string>();
