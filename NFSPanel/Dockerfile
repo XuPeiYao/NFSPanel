@@ -10,8 +10,9 @@ ENV Exports=/etc/exports
 ENV NFS=/etc/init.d/nfs-kernel-server
 
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 80 443
+EXPOSE 111/udp 111/tcp
+EXPOSE 2049/udp 2049/tcp
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0-stretch AS build
 WORKDIR /src
