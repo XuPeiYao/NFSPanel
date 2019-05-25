@@ -18,12 +18,12 @@
         <div class="col-sm" style="        text-align: right">
             <button type="button" class="btn btn-warning" onclick="@Save">
                 @if (saveing) {
-                    <div class="spinner-border text-primary" role="status" style="        width: 20px;
+                <div class="spinner-border text-primary" role="status" style="        width: 20px;
         height: 20px;">
-                        <span class="sr-only">Loading...</span>
-                    </div>
+                    <span class="sr-only">Loading...</span>
+                </div>
                 } else {
-                    <i class="fas fa-save"></i>
+                <i class="fas fa-save"></i>
                 } 儲存掛載
             </button>
         </div>
@@ -48,26 +48,26 @@
                 </h3>
             </div>
             @foreach (var client in MountInstance.Clients) {
-                <div class="input-group" style="        margin-top: 5px">
-                    <input type="text" class="form-control" placeholder="客戶端位址" bind="@client.Client" />
-                    <select class="custom-select" aria-label="讀寫權限"
-                            onchange="@((UIChangeEventArgs e)=> { client.Permission = Enum.Parse<NFSPermission>(e.Value.ToString()); })">
-                        <option value="@NFSPermission.ReadOnly.ToString()" selected>唯讀</option>
-                        <option value="@NFSPermission.ReadAndWrite.ToString()">可讀寫</option>
-                    </select>
-                    <select class="custom-select" aria-label="同步類型"
-                            onchange="@((UIChangeEventArgs e)=> { client.Async = e.Value.ToString() == "Async"; })">
-                        <option value="Async" selected>異步</option>
-                        <option value="Sync">同步</option>
-                    </select>
-                    <select class="custom-select" aria-label="Squash"
-                            onchange="@((UIChangeEventArgs e)=> { client.Squash = Enum.Parse<NFSSquash>(e.Value.ToString().Split('-')[0]); })">
-                        <option value="@NFSSquash.Root.ToString()" selected>Root-Squash</option>
-                        <option value="@NFSSquash.All.ToString()">All-Squash</option>
-                        <option value="@NFSSquash.No.ToString()">No-Squash</option>
-                    </select>
-                    <button type="button" class="btn btn-danger" onclick="@(async(e)=> {await DeleteClient(e,client); })"><i class="fas fa-trash-alt"></i> 刪除</button>
-                </div>
+            <div class="input-group" style="        margin-top: 5px">
+                <input type="text" class="form-control" placeholder="客戶端位址" bind="@client.Client" />
+                <select class="custom-select" aria-label="讀寫權限"
+                        bind="@client.Permission">
+                    <option value="@NFSPermission.ReadOnly" selected>唯讀</option>
+                    <option value="@NFSPermission.ReadAndWrite">可讀寫</option>
+                </select>
+                <select class="custom-select" aria-label="同步類型"
+                        bind="@client.IOMode">
+                    <option value="@NFSIOMode.Async" selected>異步</option>
+                    <option value="@NFSIOMode.Sync">同步</option>
+                </select>
+                <select class="custom-select" aria-label="Squash"
+                        bind="@client.Squash">
+                    <option value="@NFSSquash.Root.ToString()" selected>Root-Squash</option>
+                    <option value="@NFSSquash.All.ToString()">All-Squash</option>
+                    <option value="@NFSSquash.No.ToString()">No-Squash</option>
+                </select>
+                <button type="button" class="btn btn-danger" onclick="@(async(e)=> {await DeleteClient(e,client); })"><i class="fas fa-trash-alt"></i> 刪除</button>
+            </div>
             }
         </div>
     </div>

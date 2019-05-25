@@ -5,7 +5,7 @@ namespace NFSPanel.Data {
     public class NFSClient {
         public string Client { get; set; }
         public NFSPermission Permission { get; set; } = NFSPermission.ReadOnly;
-        public bool Async { get; set; } = true;
+        public NFSIOMode IOMode { get; set; } = NFSIOMode.Async;
         public NFSSquash Squash { get; set; } = NFSSquash.Root;
 
         public override string ToString() {
@@ -20,10 +20,13 @@ namespace NFSPanel.Data {
                     break;
             }
 
-            if (Async) {
-                options.Add("async");
-            } else {
-                options.Add("sync");
+            switch (IOMode) {
+                case NFSIOMode.Async:
+                    options.Add("async");
+                    break;
+                case NFSIOMode.Sync:
+                    options.Add("sync");
+                    break;
             }
 
             switch (Squash) {
@@ -51,7 +54,7 @@ namespace NFSPanel.Data {
                 data = data.Skip(1).ToArray();
                 var args = data[0].Split(',');
                 if (args.Contains("sync")) {
-                    result.Async = false;
+                    result.IOMode = NFSIOMode.Sync;
                 }
 
                 if (args.Contains("rw")) {
