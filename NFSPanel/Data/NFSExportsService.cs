@@ -83,7 +83,8 @@ namespace NFSPanel.Data {
 
 
         public void RestartService() {
-            Exec(Environment.GetEnvironmentVariable("NFS") + " restart");
+            var c = Exec(Environment.GetEnvironmentVariable("NFS") + " restart");
+            Console.WriteLine(c);
             Thread.Sleep(1000);
         }
     }
