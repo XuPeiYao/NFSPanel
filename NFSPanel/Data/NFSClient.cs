@@ -49,16 +49,16 @@ namespace NFSPanel.Data {
             result.Client = data[0];
             if (data.Length > 1) {
                 data = data.Skip(1).ToArray();
-
-                if (data[0].Contains("sync")) {
+                var args = data[0].Split(',');
+                if (args.Contains("sync")) {
                     result.Async = false;
                 }
 
-                if (data[0].Contains("rw")) {
+                if (args.Contains("rw")) {
                     result.Permission = NFSPermission.ReadAndWrite;
                 }
 
-                if (data[0].Contains("no_root_squash")) {
+                if (args.Contains("no_root_squash")) {
                     result.Squash = NFSSquash.No;
                 } else if (data.Contains("all_squash")) {
                     result.Squash = NFSSquash.All;
