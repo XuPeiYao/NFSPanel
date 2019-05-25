@@ -32,4 +32,4 @@ USER root
 RUN echo "service rpcbind restart\n" >> start.sh
 RUN echo "dotnet NFSPanel.dll" >> start.sh
 
-ENTRYPOINT ["bash" "start.sh"]
+ENTRYPOINT ["bash", "start.sh"]

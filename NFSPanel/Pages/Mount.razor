@@ -52,7 +52,7 @@
                     <input type="text" class="form-control" placeholder="客戶端位址" bind="@client.Client" />
                     <select class="custom-select" aria-label="讀寫權限"
                             onchange="@((UIChangeEventArgs e)=> { client.Permission = Enum.Parse<NFSPermission>(e.Value.ToString()); })">
-                        <option value="value=" Async" ReadOnly.ToString()" selected>唯讀</option>
+                        <option value="@NFSPermission.ReadOnly.ToString()" selected>唯讀</option>
                         <option value="@NFSPermission.ReadAndWrite.ToString()">可讀寫</option>
                     </select>
                     <select class="custom-select" aria-label="同步類型"
