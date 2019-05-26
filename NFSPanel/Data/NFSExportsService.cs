@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NFSPanel.Data {
@@ -57,16 +58,34 @@ namespace NFSPanel.Data {
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(x => NFSMount.Parse(x))
                 .ToList();
+
+#if DEBUG
+            if (Mounts.Count == 0) {
+                Mounts.Add(new NFSMount() {
+                    Path = "/app",
+                    Clients = new List<NFSClient>
+                    ()
+                });
+                Mounts.Add(new NFSMount() {
+                    Path = "/app2",
+                    Clients = new List<NFSClient>
+                    ()
+                });
+            }
+#endif            
         }
 
         public void SaveChanges() {
             var output = string.Join("\n", Mounts.Select(x => x.ToString()));
             File.WriteAllText(Environment.GetEnvironmentVariable("Exports"), output);
+            Thread.Sleep(1000);
         }
 
 
         public void RestartService() {
-            Exec(Environment.GetEnvironmentVariable("NFS") + " restart");
+            var c = Exec(Environment.GetEnvironmentVariable("NFS") + " restart");
+            Console.WriteLine(c);
+            Thread.Sleep(1000);
         }
     }
 }

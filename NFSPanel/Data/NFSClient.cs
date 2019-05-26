@@ -5,8 +5,8 @@ namespace NFSPanel.Data {
     public class NFSClient {
         public string Client { get; set; }
         public NFSPermission Permission { get; set; } = NFSPermission.ReadOnly;
-        public bool Async { get; set; } = true;
-        public NFSSquash Squash { get; set; }
+        public NFSIOMode IOMode { get; set; } = NFSIOMode.Async;
+        public NFSSquash Squash { get; set; } = NFSSquash.Root;
 
         public override string ToString() {
             List<string> options = new List<string>();
@@ -20,10 +20,13 @@ namespace NFSPanel.Data {
                     break;
             }
 
-            if (Async) {
-                options.Add("async");
-            } else {
-                options.Add("sync");
+            switch (IOMode) {
+                case NFSIOMode.Async:
+                    options.Add("async");
+                    break;
+                case NFSIOMode.Sync:
+                    options.Add("sync");
+                    break;
             }
 
             switch (Squash) {
@@ -49,16 +52,16 @@ namespace NFSPanel.Data {
             result.Client = data[0];
             if (data.Length > 1) {
                 data = data.Skip(1).ToArray();
-
-                if (data[0].Contains("sync")) {
-                    result.Async = false;
+                var args = data[0].Split(',');
+                if (args.Contains("sync")) {
+                    result.IOMode = NFSIOMode.Sync;
                 }
 
-                if (data[0].Contains("rw")) {
+                if (args.Contains("rw")) {
                     result.Permission = NFSPermission.ReadAndWrite;
                 }
 
-                if (data[0].Contains("no_root_squash")) {
+                if (args.Contains("no_root_squash")) {
                     result.Squash = NFSSquash.No;
                 } else if (data.Contains("all_squash")) {
                     result.Squash = NFSSquash.All;

@@ -1,12 +1,149 @@
 @page "/"
 @using NFSPanel.Data
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop;
+@using System.IO;
+@using System.Threading;
+@using System.Text;
+@inject IJSRuntime jsRuntime
 @inject NFSExportsService nfsServices
+@inject IUriHelper uriHelper
 
+<div class="container">
+    <div class="row">
+        <div class="col-sm" style="        text-align: left">
+            <h1>掛載目錄</h1>
+        </div>
+        <div class="col-sm" style="        text-align: right">
+            <button type="button" class="btn btn-primary" onclick="@AddMount"><i class="fas fa-plus-circle"></i> 新增</button>
+            <button type="button" class="btn btn-success" onclick="@Reload">
+                @if (reloading) {
+                    <div class="spinner-border text-primary" role="status" style="        width: 20px;
+        height: 20px;">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                } else {
+                    <i class="fas fa-sync-alt"></i>
+                } 重新載入
+            </button>
+            <button type="button" class="btn btn-warning" onclick="@Save">
+                @if (saveing) {
+                    <div class="spinner-border text-primary" role="status" style="        width: 20px;
+        height: 20px;">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                } else {
+                    <i class="fas fa-save"></i>
+                } 存檔
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td scope="col">
+                            #
+                        </td>
+                        <td scope="col">
+                            目錄
+                        </td>
+                        <td scope="col">
+                            操作
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var mount in mounts) {
+                        <tr>
+                            <td scope="row">@(mounts.IndexOf(mount) + 1)</td>
+                            <td>@mount.Path</td>
+                            <td>
+                                <button type="button" class="btn btn-primary" onclick="@(async(e)=> await GotoEdit(e,mount))"><i class="fas fa-edit"></i> 編輯</button>
+                                <button type="button" class="btn btn-danger" onclick="@(async(e) => await OpenDeleteMountModal(e,mount))"><i class="fas fa-trash-alt"></i> 刪除</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteMountModal" tabindex="-1" role="dialog" aria-labelledby="deleteMountModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteMountModalLabel">確認刪除掛載</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                您確定要刪除掛載"@selectedMount?.Path"?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" onclick="@DeleteMount">確定</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @functions {
-    List<NFSMount> mounts;
+    List<NFSMount>
+    mounts;
+
+    NFSMount selectedMount;
+
+    bool saveing = false;
+    bool reloading = false;
 
     protected override async Task OnInitAsync() {
         mounts = nfsServices.Mounts;
+    }
+
+    public async Task OpenDeleteMountModal(UIMouseEventArgs e, NFSMount mount) {
+        selectedMount = mount;
+        await jsRuntime.InvokeAsync<object>
+            ("eval", "$('#deleteMountModal').modal('show');0;");
+    }
+
+    public async Task DeleteMount() {
+        mounts.Remove(selectedMount);
+        selectedMount = null;
+        await jsRuntime.InvokeAsync<object>
+            ("eval", "$('#deleteMountModal').modal('hide')");
+    }
+
+    public async Task GotoEdit(UIMouseEventArgs e, NFSMount mount) {
+        uriHelper.NavigateTo($"/mount/{Convert.ToBase64String(Encoding.UTF8.GetBytes(mount.Path))}");
+    }
+
+    public async Task AddMount(UIMouseEventArgs e) {
+        uriHelper.NavigateTo($"/mount");
+    }
+
+    public async Task Save(UIMouseEventArgs e) {
+        if (saveing) {
+            return;
+        }
+        saveing = true;
+        StateHasChanged();
+        await Task.Run(nfsServices.SaveChanges);
+        saveing = false;
+        StateHasChanged();
+    }
+
+    public async Task Reload(UIMouseEventArgs e) {
+        if (reloading) {
+            return;
+        }
+        reloading = true;
+        StateHasChanged();
+        await Task.Run(nfsServices.Reload);
+        mounts = nfsServices.Mounts;
+        reloading = false;
+        StateHasChanged();
     }
 }
